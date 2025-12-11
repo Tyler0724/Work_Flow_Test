@@ -1,4 +1,4 @@
-# Vulnerable App (Demo)
+# Vulnerable App
 
 Purpose-built sample to generate Safety findings for the SARIF upload workflow.
 
