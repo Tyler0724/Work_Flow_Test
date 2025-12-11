@@ -16,3 +16,4 @@ cd ..
 python ../safety-sarif-action/converter.py --input safety-output.json --output safety.sarif --manifest vulnerable-app/requirements.txt
 ```
 Inspect `safety.sarif` then upload with the workflow or `upload-sarif` action.
+
