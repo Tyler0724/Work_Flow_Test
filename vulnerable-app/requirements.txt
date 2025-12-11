@@ -1,0 +1,6 @@
+# Intentionally vulnerable dependency versions for demo purposes only.
+Flask==0.12.2
+requests==2.19.0
+PyYAML==5.3
+Pillow==5.1.0
+cryptography==3.3.1
