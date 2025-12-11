@@ -20,19 +20,27 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.11"
 
       - name: Install Safety
         run: |
           python -m pip install --upgrade pip
-          python -m pip install safety
+          python -m pip install --upgrade safety
 
       - name: Run Safety on vulnerable requirements
         working-directory: vulnerable-app
         run: |
-          safety scan --file requirements.txt --output json --continue-on-error > ../safety-output.json
+          set -eo pipefail
+          echo "Python:" $(python -V)
+          safety --version
+          safety scan --file requirements.txt --output json --continue-on-error --no-input > ../safety-output.json 2> ../safety-error.log || true
+          echo "=== safety stderr ==="
+          if [ -s ../safety-error.log ]; then cat ../safety-error.log; else echo "(no stderr)"; fi
+          echo "=== safety stdout ==="
+          if [ -s ../safety-output.json ]; then head -n 50 ../safety-output.json; else echo "(no output json)"; fi
 
       - name: Convert Safety output to SARIF
+        if: always()
         uses: Henderalex/safety-sarif-action@v1
         with:
           input_file: safety-output.json
