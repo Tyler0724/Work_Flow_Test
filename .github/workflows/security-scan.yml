@@ -44,14 +44,14 @@ jobs:
           if [ -s ../safety-output.json ]; then head -n 50 ../safety-output.json; else echo "(no output json)"; fi
         shell: bash
 
-      - name: Convert Safety output to SARIF
+      - name: Fetch converter
         if: always() && hashFiles('safety-output.json') != ''
-        uses: Henderalex/safety-sarif-action@v1
-        with:
-          input_file: safety-output.json
-          output_file: safety.sarif
-          manifest: vulnerable-app/requirements.txt
-          tool: safety
+        run: |
+          curl -sL https://raw.githubusercontent.com/Henderalex/safety-sarif-action/main/converter.py -o converter.py
+      - name: Convert Safety output to SARIF
+        if: always() && hashFiles('safety-output.json') != '' && hashFiles('converter.py') != ''
+        run: |
+          python converter.py --input safety-output.json --output safety.sarif --manifest vulnerable-app/requirements.txt --tool safety
 
       - name: Upload SARIF to GitHub Code Scanning
         if: always() && hashFiles('safety.sarif') != ''
