@@ -28,7 +28,7 @@ jobs:
       - name: Install Safety
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade safety
+          python -m pip install "safety==2.3.5"
 
       - name: Run Safety on vulnerable requirements
         working-directory: vulnerable-app
@@ -36,7 +36,8 @@ jobs:
           set -o pipefail
           echo "Python:" $(python -V)
           safety --version
-          safety scan --file requirements.txt --output json --continue-on-error --no-input --disable-telemetry > ../safety-output.json 2> ../safety-error.log || true
+          # Pinning safety 2.3.5 avoids newer CLI prompts for API keys in CI.
+          safety check --file requirements.txt --json > ../safety-output.json 2> ../safety-error.log || true
           echo "=== safety stderr ==="
           if [ -s ../safety-error.log ]; then cat ../safety-error.log; else echo "(no stderr)"; fi
           echo "=== safety stdout ==="
