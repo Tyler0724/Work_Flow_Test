@@ -45,8 +45,7 @@ jobs:
         shell: bash
 
       - name: Convert Safety output to SARIF
-        if: always() && hashFiles('safety-output.json') != ''
-        uses: Henderalex/safety-sarif-action@v1
+        uses: Henderalex/safety-sarif-action@v2
         with:
           input_file: safety-output.json
           output_file: safety.sarif
