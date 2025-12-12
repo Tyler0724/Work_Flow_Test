@@ -13,6 +13,9 @@ permissions:
 jobs:
   safety-scan:
     runs-on: ubuntu-latest
+    env:
+      SAFETY_DISABLE_TELEMETRY: "1"
+      SAFETY_IN_CI: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,17 +33,18 @@ jobs:
       - name: Run Safety on vulnerable requirements
         working-directory: vulnerable-app
         run: |
-          set -eo pipefail
+          set -o pipefail
           echo "Python:" $(python -V)
           safety --version
-          safety scan --file requirements.txt --output json --continue-on-error --no-input > ../safety-output.json 2> ../safety-error.log || true
+          safety scan --file requirements.txt --output json --continue-on-error --no-input --disable-telemetry > ../safety-output.json 2> ../safety-error.log || true
           echo "=== safety stderr ==="
           if [ -s ../safety-error.log ]; then cat ../safety-error.log; else echo "(no stderr)"; fi
           echo "=== safety stdout ==="
           if [ -s ../safety-output.json ]; then head -n 50 ../safety-output.json; else echo "(no output json)"; fi
+        shell: bash
 
       - name: Convert Safety output to SARIF
-        if: always()
+        if: always() && hashFiles('safety-output.json') != ''
         uses: Henderalex/safety-sarif-action@v1
         with:
           input_file: safety-output.json
@@ -49,6 +53,7 @@ jobs:
           tool: safety
 
       - name: Upload SARIF to GitHub Code Scanning
+        if: always() && hashFiles('safety.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: safety.sarif
